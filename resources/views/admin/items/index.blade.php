@@ -1,41 +1,19 @@
 @extends('admin.layout')
 
-@section('content')
-    <div class="page-header">
-        <div>
-            <p class="eyebrow">Dashboard</p>
-            <h1>{{ __('messages.admin_dashboard') }}</h1>
-        </div>
-        <a href="{{ route('admin.items.index') }}" class="primary-button">{{ __('messages.items') }}</a>
-    </div>
+@section('title', 'Inventory')
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <span class="stat-label">Inventory</span>
-            <strong>{{ $items->count() }}</strong>
-            <small>active products</small>
-        </div>
-        <div class="stat-card">
-            <span class="stat-label">Low stock</span>
-            <strong>{{ $items->where('stock_quantity', '<=', 5)->count() }}</strong>
-            <small>items to review</small>
-        </div>
-        <div class="stat-card">
-            <span class="stat-label">Value</span>
-            <strong>৳{{ number_format($items->sum(fn ($item) => $item->price * $item->stock_quantity), 2) }}</strong>
-            <small>stock value</small>
-        </div>
+@section('content')
+    <div class="toolbar">
+        <h1 class="toolbar-title">{{ __('messages.inventory') }}</h1>
+        <a href="{{ route('admin.items.create') }}" class="primary-button">Add item</a>
     </div>
 
     <div class="card table-card">
-        <div class="table-header">
-            <h2>Latest inventory</h2>
-            <a href="{{ route('admin.items.create') }}" class="secondary-button">Add item</a>
-        </div>
         <table>
             <thead>
                 <tr>
                     <th>{{ __('messages.name') }}</th>
+                    <th>{{ __('messages.description') }}</th>
                     <th>{{ __('messages.price') }}</th>
                     <th>{{ __('messages.stock') }}</th>
                     <th>{{ __('messages.action') }}</th>
@@ -45,6 +23,7 @@
                 @forelse ($items as $item)
                     <tr>
                         <td>{{ $item->name }}</td>
+                        <td>{{ $item->description ?: '—' }}</td>
                         <td>৳{{ number_format($item->price, 2) }}</td>
                         <td><span class="stock-pill">{{ $item->stock_quantity }}</span></td>
                         <td>
@@ -60,7 +39,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="empty-state">No items available yet.</td>
+                        <td colspan="5" class="empty-state">No grocery items have been added yet.</td>
                     </tr>
                 @endforelse
             </tbody>

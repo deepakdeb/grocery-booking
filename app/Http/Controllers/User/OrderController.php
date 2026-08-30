@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\StoreOrderRequest;
 use App\Services\OrderService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -11,25 +15,19 @@ class OrderController extends Controller
 {
     public function __construct(protected OrderService $service) {}
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
-        $orders = $this->service->historyForUser($request->user()->id);
+        $orders = $this->service->historyForUser((int) $request->user()->id);
 
         return response()->json([
             'data' => $orders,
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreOrderRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'items' => 'required|array|min:1',
-            'items.*.grocery_item_id' => 'required|integer|exists:grocery_items,id',
-            'items.*.quantity' => 'required|integer|min:1',
-        ]);
-
         try {
-            $order = $this->service->createForUser($request->user()->id, $validated['items']);
+            $order = $this->service->createForUser((int) $request->user()->id, $request->validated()['items']);
 
             return response()->json([
                 'message' => 'Order placed successfully.',

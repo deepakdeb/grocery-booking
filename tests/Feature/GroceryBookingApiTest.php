@@ -33,6 +33,15 @@ class GroceryBookingApiTest extends TestCase
             ->assertJsonPath('data.stock_quantity', 10);
     }
 
+    public function test_admin_inventory_page_is_available(): void
+    {
+        $response = $this->get('/admin/items');
+
+        $response->assertOk()
+            ->assertSee('Inventory')
+            ->assertSee('Add item');
+    }
+
     public function test_user_can_place_order_with_stock_deduction(): void
     {
         $role = Role::factory()->user()->create();

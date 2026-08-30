@@ -18,7 +18,7 @@ Route::middleware(['auth:api', 'role:admin'])->group(function () {
     Route::delete('/admin/grocery-items/{id}', [GroceryController::class, 'destroy']);
 });
 
-Route::middleware(['auth:api', 'role:user'])->group(function () {
+Route::middleware(['auth:api', 'role:user,admin'])->group(function () {
     Route::get('/items', [GroceryController::class, 'index']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders', [OrderController::class, 'index']);
