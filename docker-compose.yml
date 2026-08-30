@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: grocery-booking-app
+    working_dir: /var/www
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www
+    depends_on:
+      - db
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_KEY: base64:5qA9rQwXfP2LrT0u5l5RjQO9Z5jzP0Fa4H7P7hQ6M1M=
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: grocery_booking
+      DB_USERNAME: grocery
+      DB_PASSWORD: secret
+    command: sh -c "php artisan key:generate --force && php artisan migrate --seed && php artisan serve --host=0.0.0.0 --port=8000"
+
+  db:
+    image: mysql:8.0
+    container_name: grocery-booking-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: grocery_booking
+      MYSQL_USER: grocery
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+
+volumes:
+  dbdata:
