@@ -42,6 +42,21 @@ class GroceryBookingApiTest extends TestCase
             ->assertSee('Add item');
     }
 
+    public function test_customer_store_page_has_ajax_add_to_order_hook(): void
+    {
+        GroceryItem::factory()->create([
+            'name' => 'Milk',
+            'price' => 20,
+            'stock_quantity' => 5,
+        ]);
+
+        $response = $this->get('/orders');
+
+        $response->assertOk()
+            ->assertSee('Add to order')
+            ->assertSee('data-ajax-add-to-order="true"');
+    }
+
     public function test_user_can_place_order_with_stock_deduction(): void
     {
         $role = Role::factory()->user()->create();
