@@ -10,9 +10,9 @@ class GroceryService
         protected GroceryRepositoryInterface $repository
     ) {}
 
-    public function all()
+    public function all(?int $perPage = null, ?int $page = null)
     {
-        return $this->repository->all();
+        return $this->repository->all($perPage, $page);
     }
 
     public function getById(int $id)

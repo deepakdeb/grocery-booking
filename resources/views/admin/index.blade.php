@@ -35,14 +35,14 @@
                 adminMessage.style.display = 'block';
             }
 
-            function renderStats(items) {
+            function renderStats(items, total) {
                 const lowStock = items.filter((item) => Number(item.stock_quantity) <= 5).length;
                 const totalValue = items.reduce((sum, item) => sum + (Number(item.price) * Number(item.stock_quantity)), 0);
 
                 statsGrid.innerHTML = `
                     <div class="stat-card">
                         <span class="stat-label">Inventory</span>
-                        <strong>${items.length}</strong>
+                        <strong>${total}</strong>
                         <small>active products</small>
                     </div>
                     <div class="stat-card">
@@ -134,7 +134,7 @@
                 return;
             }
 
-            fetch('/api/admin/grocery-items', {
+            fetch('/api/admin/grocery-items?per_page=100', {
                 headers: {
                     'Accept': 'application/json',
                     'Authorization': 'Bearer ' + token,
@@ -147,7 +147,8 @@
                     }
 
                     const items = Array.isArray(result.data) ? result.data : [];
-                    renderStats(items);
+                    const total = (result.meta && result.meta.total) ? result.meta.total : items.length;
+                    renderStats(items, total);
                     renderTable(items);
                 })
                 .catch((error) => {

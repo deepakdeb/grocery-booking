@@ -11,6 +11,7 @@
     <div id="adminItemMessage" class="message" style="display:none;"></div>
     <div class="card table-card">
         <div id="inventoryList">Loading inventory...</div>
+        <div id="inventoryPagination" style="display:inline-flex; align-items:center; gap:12px; margin-top:14px;"></div>
     </div>
 
     <script>
@@ -20,6 +21,7 @@
             const userRole = (storedUser && storedUser.role && storedUser.role.name) || null;
             const adminItemMessage = document.getElementById('adminItemMessage');
             const inventoryList = document.getElementById('inventoryList');
+            const inventoryPagination = document.getElementById('inventoryPagination');
 
             function showMessage(text, type) {
                 adminItemMessage.textContent = text;
@@ -98,30 +100,61 @@
                 });
             }
 
+            function renderPagination(meta, links) {
+                if (!meta) {
+                    inventoryPagination.innerHTML = '';
+                    return;
+                }
+
+                const prevDisabled = !links || !links.prev;
+                const nextDisabled = !links || !links.next;
+
+                inventoryPagination.innerHTML = `
+                    <span class="eyebrow" style="margin:0;">${meta.current_page} / ${meta.last_page} &middot; ${meta.total} items</span>
+                    <button type="button" class="secondary-button small" data-prev-page ${prevDisabled ? 'disabled' : ''}>Prev</button>
+                    <button type="button" class="secondary-button small" data-next-page ${nextDisabled ? 'disabled' : ''}>Next</button>
+                `;
+
+                inventoryPagination.querySelector('[data-prev-page]').addEventListener('click', () => {
+                    if (!prevDisabled) {
+                        fetchInventory(meta.current_page - 1);
+                    }
+                });
+
+                inventoryPagination.querySelector('[data-next-page]').addEventListener('click', () => {
+                    if (!nextDisabled) {
+                        fetchInventory(meta.current_page + 1);
+                    }
+                });
+            }
+
             if (!token || userRole !== 'admin') {
                 showMessage('Unauthorized. Please log in as an admin.', 'error');
                 setTimeout(() => window.location.href = '{{ route('login') }}', 700);
                 return;
             }
 
-            fetch('/api/admin/grocery-items', {
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': 'Bearer ' + token,
-                },
-            })
-                .then(async (response) => {
-                    const result = await response.json().catch(() => ({}));
-                    if (!response.ok) {
-                        throw new Error(result.message || 'Unable to load inventory.');
-                    }
-
-                    const items = Array.isArray(result.data) ? result.data : [];
-                    renderRows(items);
-                })
-                .catch((error) => {
-                    showMessage(error.message || 'Unable to load inventory.', 'error');
+            async function fetchInventory(page) {
+                const response = await fetch(`/api/admin/grocery-items?page=${page || 1}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': 'Bearer ' + token,
+                    },
                 });
+
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(result.message || 'Unable to load inventory.');
+                }
+
+                const items = Array.isArray(result.data) ? result.data : [];
+                renderRows(items);
+                renderPagination(result.meta, result.links);
+            }
+
+            fetchInventory(1).catch((error) => {
+                showMessage(error.message || 'Unable to load inventory.', 'error');
+            });
         })();
     </script>
 @endsection

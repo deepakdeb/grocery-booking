@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\GroceryItem;
+use App\Models\Order;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -110,5 +111,72 @@ class GroceryBookingApiTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonPath('message', 'Requested quantity exceeds available stock.');
+    }
+
+    public function test_grocery_items_list_is_paginated(): void
+    {
+        $admin = User::factory()->create([
+            'role_id' => Role::factory()->admin()->create()->id,
+        ]);
+        GroceryItem::factory()->count(30)->create();
+
+        $token = auth('api')->login($admin);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/admin/grocery-items?per_page=5&page=2');
+
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta', 'links'])
+            ->assertJsonPath('meta.per_page', 5)
+            ->assertJsonPath('meta.current_page', 2)
+            ->assertJsonPath('meta.total', 30)
+            ->assertJsonPath('meta.last_page', 6)
+            ->assertJsonPath('meta.from', 6)
+            ->assertJsonPath('meta.to', 10);
+
+        $response->assertJsonCount(5, 'data');
+    }
+
+    public function test_grocery_items_list_uses_default_per_page(): void
+    {
+        $admin = User::factory()->create([
+            'role_id' => Role::factory()->admin()->create()->id,
+        ]);
+        GroceryItem::factory()->count(20)->create();
+
+        $token = auth('api')->login($admin);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/admin/grocery-items');
+
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta', 'links'])
+            ->assertJsonPath('meta.per_page', 15)
+            ->assertJsonPath('meta.current_page', 1)
+            ->assertJsonPath('meta.total', 20)
+            ->assertJsonPath('meta.last_page', 2);
+
+        $response->assertJsonCount(15, 'data');
+    }
+
+    public function test_order_history_list_is_paginated(): void
+    {
+        $role = Role::factory()->user()->create();
+        $user = User::factory()->create(['role_id' => $role->id]);
+        Order::factory()->count(25)->create(['user_id' => $user->id]);
+
+        $token = auth('api')->login($user);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/orders?per_page=10&page=1');
+
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta', 'links'])
+            ->assertJsonPath('meta.per_page', 10)
+            ->assertJsonPath('meta.current_page', 1)
+            ->assertJsonPath('meta.total', 25)
+            ->assertJsonPath('meta.last_page', 3);
+
+        $response->assertJsonCount(10, 'data');
     }
 }

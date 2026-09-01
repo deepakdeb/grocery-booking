@@ -164,7 +164,7 @@
                     return;
                 }
 
-                const response = await fetch('/api/items', {
+                const response = await fetch('/api/items?per_page=100', {
                     headers: {
                         'Accept': 'application/json',
                         'Authorization': 'Bearer ' + token,
@@ -185,7 +185,7 @@
                     return;
                 }
 
-                const response = await fetch('/api/orders', {
+                const response = await fetch('/api/orders?per_page=100', {
                     headers: {
                         'Accept': 'application/json',
                         'Authorization': 'Bearer ' + token,

@@ -47,8 +47,11 @@ class OrderRepository implements OrderRepositoryInterface
         });
     }
 
-    public function history(int $userId)
+    public function history(int $userId, ?int $perPage = null, ?int $page = null)
     {
-        return Order::with('items.groceryItem')->where('user_id', $userId)->orderByDesc('created_at')->get();
+        return Order::with('items.groceryItem')
+            ->where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->paginate($perPage, ['*'], 'page', $page);
     }
 }

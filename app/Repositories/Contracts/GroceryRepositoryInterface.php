@@ -4,7 +4,7 @@ namespace App\Repositories\Contracts;
 
 interface GroceryRepositoryInterface
 {
-    public function all();
+    public function all(?int $perPage = null, ?int $page = null);
 
     public function find(int $id);
 

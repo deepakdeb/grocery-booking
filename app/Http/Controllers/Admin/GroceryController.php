@@ -9,16 +9,20 @@ use App\Http\Requests\Admin\StoreGroceryItemRequest;
 use App\Http\Requests\Admin\UpdateGroceryItemRequest;
 use App\Services\GroceryService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class GroceryController extends Controller
 {
     public function __construct(protected GroceryService $service) {}
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return response()->json([
-            'data' => $this->service->all(),
-        ]);
+        $perPage = $this->resolvePerPage($request);
+        $page = (int) $request->query('page', 1);
+
+        $items = $this->service->all($perPage, $page);
+
+        return $this->paginatedResponse($items);
     }
 
     public function store(StoreGroceryItemRequest $request): JsonResponse

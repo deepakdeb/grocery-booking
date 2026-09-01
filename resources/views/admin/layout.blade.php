@@ -311,7 +311,7 @@
 
                  localStorage.removeItem('grocery_token');
                  localStorage.removeItem('grocery_user');
-                 window.location.href = '{{ route('login') }}';9
+                 window.location.href = '{{ route('login') }}';
              });
          })();
      </script>

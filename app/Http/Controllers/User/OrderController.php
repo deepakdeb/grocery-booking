@@ -17,11 +17,14 @@ class OrderController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $orders = $this->service->historyForUser((int) $request->user()->id);
+        $perPage = $this->resolvePerPage($request);
+        $page = (int) $request->query('page', 1);
 
-        return response()->json([
-            'data' => $orders,
-        ]);
+        $orders = $this->service->historyForUser(
+            (int) $request->user()->id, $perPage, $page
+        );
+
+        return $this->paginatedResponse($orders);
     }
 
     public function store(StoreOrderRequest $request): JsonResponse

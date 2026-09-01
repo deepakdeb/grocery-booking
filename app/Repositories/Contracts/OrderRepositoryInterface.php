@@ -6,5 +6,5 @@ interface OrderRepositoryInterface
 {
     public function createWithItems(int $userId, array $items): mixed;
 
-    public function history(int $userId);
+    public function history(int $userId, ?int $perPage = null, ?int $page = null);
 }

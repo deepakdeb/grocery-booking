@@ -7,9 +7,9 @@ use App\Repositories\Contracts\GroceryRepositoryInterface;
 
 class GroceryRepository implements GroceryRepositoryInterface
 {
-    public function all()
+    public function all(?int $perPage = null, ?int $page = null)
     {
-        return GroceryItem::orderBy('id', 'asc')->get();
+        return GroceryItem::orderBy('id', 'asc')->paginate($perPage, ['*'], 'page', $page);
     }
 
     public function find(int $id)

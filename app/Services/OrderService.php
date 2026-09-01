@@ -22,8 +22,8 @@ class OrderService
         return $this->repository->createWithItems($userId, $items);
     }
 
-    public function historyForUser(int $userId)
+    public function historyForUser(int $userId, ?int $perPage = null, ?int $page = null)
     {
-        return $this->repository->history($userId);
+        return $this->repository->history($userId, $perPage, $page);
     }
 }
