@@ -82,7 +82,7 @@
                                     <td><span class="stock-pill">${item.stock_quantity}</span></td>
                                     <td>
                                         <div class="inline-actions">
-                                            <a href="{{ route('admin.items.create') }}" class="secondary-button small">Edit</a>
+                                            <a href="{{ route('admin.items.edit', ['id' => '__ID__']) }}" class="secondary-button small" data-edit-item="${item.id}">Edit</a>
                                             <button type="button" class="danger-button small" data-admin-delete="${item.id}">Delete</button>
                                         </div>
                                     </td>
@@ -91,6 +91,41 @@
                         </tbody>
                     </table>
                 `;
+
+                inventoryTable.querySelectorAll('[data-edit-item]').forEach((link) => {
+                    const itemId = link.getAttribute('data-edit-item');
+                    link.href = '{{ route('admin.items.edit', ['id' => ':id']) }}'.replace(':id', itemId);
+                });
+
+                inventoryTable.querySelectorAll('[data-admin-delete]').forEach((button) => {
+                    button.addEventListener('click', async () => {
+                        const itemId = button.getAttribute('data-admin-delete');
+                        if (!window.confirm('Delete this item?')) {
+                            return;
+                        }
+
+                        try {
+                            const response = await fetch(`/api/admin/grocery-items/${itemId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Authorization': 'Bearer ' + token,
+                                },
+                            });
+
+                            const result = await response.json().catch(() => ({}));
+                            if (!response.ok) {
+                                throw new Error(result.message || 'Unable to delete item.');
+                            }
+
+                            button.closest('tr').remove();
+                            showMessage('Item deleted successfully.', 'success');
+                            window.location.reload();
+                        } catch (error) {
+                            showMessage(error.message || 'Unable to delete item.', 'error');
+                        }
+                    });
+                });
             }
 
             if (!token || userRole !== 'admin') {

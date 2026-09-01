@@ -88,8 +88,9 @@
                 localStorage.setItem('grocery_user', JSON.stringify(result.user || {}));
                 showMessage('Registration successful.', 'success');
 
+                const role = (result.user && result.user.role && result.user.role.name) || 'user';
                 setTimeout(() => {
-                    window.location.href = ordersUrl;
+                    window.location.href = role === 'admin' ? '{{ route('admin.index') }}' : ordersUrl;
                 }, 550);
             } catch (error) {
                 showMessage(error.message || 'Registration failed.', 'error');
