@@ -269,7 +269,7 @@
                 @else
                     <a href="{{ route('lang.switch', ['locale' => 'bn']) }}">বাংলা</a>
                 @endif
-                <button type="button" onclick="window.location.href='{{ route('login') }}'">{{ __('messages.logout') }}</button>
+                <button type="button" id="adminLogout">{{ __('messages.logout') }}</button>
             </nav>
         </div>
     </header>
@@ -287,6 +287,33 @@
         @endif
 
         @yield('content')
-    </main>
-</body>
+     </main>
+
+     <script>
+         (function () {
+             const logoutBtn = document.getElementById('adminLogout');
+             if (!logoutBtn) return;
+
+             logoutBtn.addEventListener('click', async function () {
+                 const token = localStorage.getItem('grocery_token');
+
+                 try {
+                     await fetch('/api/logout', {
+                         method: 'POST',
+                         headers: {
+                             'Accept': 'application/json',
+                             'Authorization': 'Bearer ' + token,
+                         },
+                     });
+                 } catch (e) {
+                     // ignore and still clear + redirect
+                 }
+
+                 localStorage.removeItem('grocery_token');
+                 localStorage.removeItem('grocery_user');
+                 window.location.href = '{{ route('login') }}';9
+             });
+         })();
+     </script>
+ </body>
 </html>

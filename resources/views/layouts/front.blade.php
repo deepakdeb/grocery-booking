@@ -298,7 +298,21 @@
 
             const logoutButton = document.getElementById('logoutButton');
             if (logoutButton) {
-                logoutButton.addEventListener('click', function () {
+                logoutButton.addEventListener('click', async function () {
+                    const logoutToken = localStorage.getItem('grocery_token');
+
+                    try {
+                        await fetch('/api/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Authorization': 'Bearer ' + logoutToken,
+                            },
+                        });
+                    } catch (e) {
+                        // ignore and still clear + redirect
+                    }
+
                     localStorage.removeItem('grocery_token');
                     localStorage.removeItem('grocery_user');
                     window.location.href = '{{ route('login') }}';
