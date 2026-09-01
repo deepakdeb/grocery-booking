@@ -264,8 +264,11 @@
                 <a href="{{ route('admin.index') }}">Dashboard</a>
                 <a href="{{ route('admin.items.index') }}">Inventory</a>
                 <a href="{{ route('home') }}">{{ __('messages.home') }}</a>
-                <a href="{{ route('lang.switch', ['locale' => 'en']) }}">EN</a>
-                <a href="{{ route('lang.switch', ['locale' => 'bn']) }}">বাংলা</a>
+                @if (app()->getLocale() === 'bn')
+                    <a href="{{ route('lang.switch', ['locale' => 'en']) }}">EN</a>
+                @else
+                    <a href="{{ route('lang.switch', ['locale' => 'bn']) }}">বাংলা</a>
+                @endif
                 <button type="button" onclick="window.location.href='{{ route('login') }}'">{{ __('messages.logout') }}</button>
             </nav>
         </div>
