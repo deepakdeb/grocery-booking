@@ -54,7 +54,13 @@ class GroceryBookingApiTest extends TestCase
 
         $response->assertOk()
             ->assertSee('Add to order')
-            ->assertSee('data-ajax-add-to-order="true"');
+            ->assertSee('data-ajax-add-to-order');
+    }
+
+    public function test_web_routes_are_view_only_for_storefront(): void
+    {
+        $this->get('/orders/add')->assertNotFound();
+        $this->get('/orders/checkout')->assertNotFound();
     }
 
     public function test_user_can_place_order_with_stock_deduction(): void

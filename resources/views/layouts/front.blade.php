@@ -248,8 +248,10 @@
             <nav class="nav" aria-label="Main navigation">
                 <a href="{{ route('home') }}">{{ __('messages.home') }}</a>
                 <a href="{{ route('orders') }}">{{ __('messages.store') }}</a>
-                <a href="{{ route('login') }}">{{ __('messages.login') }}</a>
-                <a href="{{ route('register') }}">{{ __('messages.register') }}</a>
+                <a href="{{ route('admin.index') }}" data-admin-link="true" style="display:none;">Admin</a>
+                <a href="{{ route('login') }}" data-auth-guest="true">{{ __('messages.login') }}</a>
+                <a href="{{ route('register') }}" data-auth-guest="true">{{ __('messages.register') }}</a>
+                <button type="button" data-auth-user="true" style="display:none;" id="logoutButton">Logout</button>
                 <a href="{{ route('lang.switch', ['locale' => 'en']) }}" aria-label="English">EN</a>
                 <a href="{{ route('lang.switch', ['locale' => 'bn']) }}" aria-label="Bangla">বাংলা</a>
             </nav>
@@ -259,5 +261,40 @@
     <main class="page-shell">
         @yield('content')
     </main>
+
+    <script>
+        (function () {
+            const token = localStorage.getItem('grocery_token');
+            const user = JSON.parse(localStorage.getItem('grocery_user') || '{}');
+            const role = (user && user.role && user.role.name) || null;
+
+            const guestLinks = document.querySelectorAll('[data-auth-guest="true"]');
+            const userOnlyButtons = document.querySelectorAll('[data-auth-user="true"]');
+            const adminLink = document.querySelector('[data-admin-link="true"]');
+
+            if (token) {
+                guestLinks.forEach((el) => el.style.display = 'none');
+                userOnlyButtons.forEach((el) => el.style.display = 'inline-flex');
+                if (role === 'admin' && adminLink) {
+                    adminLink.style.display = 'inline-flex';
+                }
+            } else {
+                guestLinks.forEach((el) => el.style.display = 'inline-flex');
+                userOnlyButtons.forEach((el) => el.style.display = 'none');
+                if (adminLink) {
+                    adminLink.style.display = 'none';
+                }
+            }
+
+            const logoutButton = document.getElementById('logoutButton');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function () {
+                    localStorage.removeItem('grocery_token');
+                    localStorage.removeItem('grocery_user');
+                    window.location.href = '{{ route('login') }}';
+                });
+            }
+        })();
+    </script>
 </body>
 </html>
